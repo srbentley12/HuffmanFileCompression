@@ -1,9 +1,10 @@
 package Encoding;
 
-import java.util.ArrayList;
 import java.util.PriorityQueue;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
-public class Huffman {
+public class HuffmanTree {
 
     public static class HuffNode implements Comparable<HuffNode> {
 
@@ -48,8 +49,8 @@ public class Huffman {
         public int size = 0;
         public HuffNode root = new HuffNode();
         public PriorityQueue<HuffNode> huffQueue = new PriorityQueue();
-        public ArrayList<String> pathTable = new ArrayList();
-        public ArrayList<Character> valueTable = new ArrayList();
+        public SortedMap<String, Character> SCmap = new TreeMap<>();
+        public SortedMap<Character, String> CSmap = new TreeMap<>();
 
         // constructor
         public HuffTree(int[] arr) {
@@ -118,9 +119,11 @@ public class Huffman {
                 } else {
                     tempChar = (char) curr.value;
                 }
-                // add value and path to code tables
-                this.valueTable.add(tempChar);
-                this.pathTable.add(str);
+                // add value and path to sorted maps
+
+                CSmap.put(tempChar, str);
+                SCmap.put(str, tempChar);
+
             }
 
             // add 0 if before moving to left child
@@ -194,16 +197,9 @@ public class Huffman {
         public String encode(String input) {
             // create empty string to hold code
             String str = "";
-
             // iterate through given string
             for (int x = 0; x < input.length(); x++) {
-                // iterate through code tables
-                for (int i = 0; i < valueTable.size(); i++) {
-                    // if char in string matches code in table, add path to string
-                    if (valueTable.get(i) == input.charAt(x)) {
-                        str += pathTable.get(i);
-                    }
-                }
+                str += CSmap.get(input.charAt(x));
             }
             return str;
         }
@@ -220,57 +216,13 @@ public class Huffman {
 
             // iterate through bits
             for (int i = 0; i < bits.length(); i++) {
-                if (!getChar(bits.substring(0, i + 1)).equals("")) {
-                    decodedStr += getChar(bits.substring(0, i + 1));
+                if (SCmap.get(bits.substring(0, i + 1)) != null) {
+                    decodedStr += SCmap.get(bits.substring(0, i + 1));
                     bits = bits.substring(i + 1);
                     i = 0;
                 }
             }
             return decodedStr;
         }
-
-        /**
-         * returns character for a given set of bits
-         *
-         * @param String -- bits to be checked
-         * @return String -- character associated with bits if any
-         */
-        private String getChar(String bits) {
-            // create string to hold potential character
-            String character = "";
-            // traverse code table to seek match
-            for (int i = 0; i < pathTable.size(); i++) {
-                // add to string if match is found
-                if (pathTable.get(i).equals(bits)) {
-                    character = valueTable.get(i).toString();
-                }
-            }
-            return character;
-        }
     }
-
-    // driver program -- main
-//    public static void main(String[] args) {
-//        // fields
-//        int[] x = new int[128];
-//        x[65] = 50;
-//        x[66] = 20;
-//        x[67] = 30;
-//
-//        // build Huffman Tree using given codes/frequencies
-//        HuffTree hTree = new HuffTree(x);
-//
-//        // display contents of Huffman Tree in Pre-Order Traversal
-//        System.out.println("Display Tree:");
-//        HuffNode curr = hTree.root;
-//        hTree.getTree(curr);
-//        System.out.println("");
-//
-//        // encode 'tea'
-//        System.out.println("Encode 'abc': " + hTree.encode("abc") + "\n");
-//
-//        // decode 'tea' -- using the actual methods built in
-//        System.out.println("Decode '" + hTree.encode("tea") + "': "
-//                + hTree.decode(hTree.encode("abc")));
-//   }
 }

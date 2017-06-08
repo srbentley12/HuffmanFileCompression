@@ -5,37 +5,22 @@
  */
 package Encoding;
 
-import Encoding.Huffman.HuffNode;
-import Encoding.Huffman.HuffTree;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class ReadingFile {
+public class FileProcessor {
 
-    public static int[] charry = new int[128];
+    public int[] charry;
 
-    public static void main(String[] args) {
-
-        try {
-            processFile(new File("WUnderland.txt"));
-        } catch (IOException ex) {
-            Logger.getLogger(ReadingFile.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        HuffTree huff = new HuffTree(charry);
-        HuffNode curr = huff.root;
-        huff.getTree(curr);
-
+    public FileProcessor(int[] charry) {
+        this.charry = charry;
     }
 
-    public static void processFile(File file) throws IOException {
+    public void processFile(File file) throws IOException {
         try (InputStream in = new FileInputStream(file);
                 Reader reader = new InputStreamReader(in)) {
             int c;
@@ -45,7 +30,7 @@ public class ReadingFile {
         }
     }
 
-    public static int charToASCII(char c) {
+    public int charToASCII(char c) {
         int ascii = (int) c;
         return ascii;
     }
