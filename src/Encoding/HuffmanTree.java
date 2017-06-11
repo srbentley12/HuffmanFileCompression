@@ -216,6 +216,8 @@ public class HuffmanTree {
 
             // iterate through bits
             for (int i = 0; i < bits.length(); i++) {
+//                if(SCmap.get(bits.substring(0, i + 1)) == null)
+//                    return null;
                 if (SCmap.get(bits.substring(0, i + 1)) != null) {
                     decodedStr += SCmap.get(bits.substring(0, i + 1));
                     bits = bits.substring(i + 1);
