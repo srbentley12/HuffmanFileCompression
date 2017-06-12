@@ -64,6 +64,7 @@ public class Compressor {
         int positionCount = 0;
         String charCode;
         String line;
+        char currentChar;
 
         try {
             fr = new FileReader(file);
@@ -75,9 +76,14 @@ public class Compressor {
                 sb.append(line);
 
                 //for each character in the string count it and encode it
-                for (int i = 0; i < line.length(); i++) {
-                    char currentChar = line.charAt(i);
-                    charCount++;
+                for (int i = 0; i < line.length() + 1; i++) {
+                    if(i == line.length()){
+                        currentChar = '\n';
+                        charCount ++;
+                        charCount ++;
+                    }else{
+                    currentChar = line.charAt(i);
+                    charCount++;}
                     charCode = huff.encode(String.valueOf(currentChar));
                     //take the encoded char and add it to the tempbyte
                     for (int x = 0; x < charCode.length(); x++) {
@@ -95,10 +101,7 @@ public class Compressor {
                         //if the byte is full, add and start count over
                         if (positionCount == 8) {
                             byteList.add(tempByte);
-                            if(test && i == 2){
-                                System.out.println("temp byte: " + String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0')); test = false;
-                            }
-                                
+                               
                             tempByte = 0;
                             positionCount = 0;
 
@@ -116,7 +119,7 @@ public class Compressor {
                 line = "";
             }
             //testing arraylist
-            System.out.println("2nd byte: " + String.format("%8s", Integer.toBinaryString(byteList.get(1) & 0xFF)).replace(' ', '0'));
+            System.out.println("1st byte: " + String.format("%8s", Integer.toBinaryString(byteList.get(0) & 0xFF)).replace(' ', '0'));
 
             //convert Byte arraylist to byte array and empty arraylist.
             byteArray = new byte[byteList.size()];

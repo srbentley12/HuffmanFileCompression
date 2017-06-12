@@ -21,8 +21,9 @@ public class Decompressor {
 
     public int[] treeArray = new int[128];
     File codFile;
-    long charTotal;
+    long charTotal = 0;
     File newFile;
+    boolean test = true;
 
     public void decompress() {
         try {
@@ -47,14 +48,14 @@ public class Decompressor {
             }
             FileWriter fw = new FileWriter(newFile, true);
             BufferedWriter bw = new BufferedWriter(fw);
-            
+            String newLine = String.valueOf(Character.toString((char) 10));
             String character = "";
             String bits = "";
             String buffer = "";
             int bufferCounter = 0;
             int byteIndex = 0;
-            for (int i = 0; i < charTotal; i++) {
-                while (huff.decode(bits).equals("")) {
+            for (int i = 0; i <= charTotal; i++) {
+                while (huff.decode(bits).equals("") && !huff.decode(bits).equals(newLine)) {
                     bits += (String.format("%8s", Integer.toBinaryString(hufArray[byteIndex] & 0xFF)).replace(' ', '0')).charAt(bufferCounter);
                     if (bufferCounter == 7) {
                         bufferCounter = -1;
@@ -64,12 +65,18 @@ public class Decompressor {
                     bufferCounter++;
                     character = huff.decode(bits);
                 }
-
-                buffer += huff.decode(bits);
-                if (i % 20 == 0) {
+                if(character.equals(newLine)){
+//                    if(test){
+//                        System.out.println("in newline loop");
+//                                test = false;
+//                    }
                     bw.write(buffer);
+                    bw.newLine();
                     buffer = "";
-                }
+                    i++;
+                    
+                } else{
+                buffer += huff.decode(bits);}
                 bits = "";
             }
             if(!buffer.equals(""))

@@ -115,7 +115,7 @@ public class HuffmanTree {
                 }
 
                 if (curr.value == 10) {
-                    tempChar = 'n';
+                    tempChar = '\n';
                 } else {
                     tempChar = (char) curr.value;
                 }
