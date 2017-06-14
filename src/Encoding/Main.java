@@ -23,29 +23,14 @@ public class Main {
     public static int[] charry = new int[128];
 
     public static void main(String[] args) {
+        Compressor compress;
+        
+        if(args.length == 2)
+        compress = new Compressor(args[0], args[1]);
+        
+        if (args.length == 1)
+            compress = new Compressor(args[0]);
 
-        FileWriter fw = null;
-//        try {
-                       Compressor compress = new Compressor("11.txt");
-           compress.writeBytes();
-           Decompressor decompress = new Decompressor();
-           decompress.decompress();
-
-
-//        BufferedReader reader = null;
-//        FileProcessor fp = new FileProcessor(charry);
-//        try {
-//            fp.processFile(new File("11.txt"));
-//        } catch (IOException ex) {
-//            Logger.getLogger(FileProcessor.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        HuffmanTree.HuffTree huff = new HuffmanTree.HuffTree(charry);
-//        huff.decode()
-//        try {
-//            fw.close();
-//        } catch (IOException ex) {
-//            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-//        }
 
     }
 

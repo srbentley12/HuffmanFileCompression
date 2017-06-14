@@ -14,7 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ *This class is called from the Compressor class.
+ * It decompresses the 2 array to a 
  * @author steve
  */
 public class Decompressor {
@@ -24,11 +25,18 @@ public class Decompressor {
     long charTotal = 0;
     File newFile;
     boolean test = true;
+    String fileName;
+    int fileNameLength;
+    
+    public Decompressor(String fileName){
+        this.fileName = fileName;
+        this.fileNameLength = fileName.length();
+    }
 
     public void decompress() {
         try {
             //reading in byte file for array to build tree
-            byte[] codArray = Files.readAllBytes(new File("11.txt.cod").toPath());
+            byte[] codArray = Files.readAllBytes(new File(fileName.substring(0, fileNameLength - 4) + ".cod").toPath());
 
             //creating proper tree array from the array file
             for (int i = 0; i < 128; i++) {
@@ -41,8 +49,8 @@ public class Decompressor {
             //creating tee
             HuffmanTree.HuffTree huff = new HuffmanTree.HuffTree(treeArray);
 
-            byte[] hufArray = Files.readAllBytes(new File("11.txt.huf").toPath());
-            newFile = new File("11x.txt");
+            byte[] hufArray = Files.readAllBytes(new File(fileName.substring(0, fileNameLength - 4) + ".huf").toPath());
+            newFile = new File(fileName.substring(0, fileNameLength - 4) + "x.txt");
             if (!newFile.exists()) {
                 newFile.createNewFile();
             }
@@ -54,7 +62,8 @@ public class Decompressor {
             String buffer = "";
             int bufferCounter = 0;
             int byteIndex = 0;
-            for (int i = 0; i <= charTotal; i++) {
+            //going bit by bit through the array for each character
+            for (int i = 0; i <= charTotal - 3; i++) {
                 while (huff.decode(bits).equals("") && !huff.decode(bits).equals(newLine)) {
                     bits += (String.format("%8s", Integer.toBinaryString(hufArray[byteIndex] & 0xFF)).replace(' ', '0')).charAt(bufferCounter);
                     if (bufferCounter == 7) {
@@ -65,11 +74,8 @@ public class Decompressor {
                     bufferCounter++;
                     character = huff.decode(bits);
                 }
+                //breaking lines
                 if(character.equals(newLine)){
-//                    if(test){
-//                        System.out.println("in newline loop");
-//                                test = false;
-//                    }
                     bw.write(buffer);
                     bw.newLine();
                     buffer = "";
@@ -81,20 +87,13 @@ public class Decompressor {
             }
             if(!buffer.equals(""))
                 bw.write(buffer);
+            bw.newLine();
+            bw.close();
+            fw.close();
+            
+            
+            
 
-        } catch (IOException ex) {
-            Logger.getLogger(Decompressor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public void readTest() {
-        try {
-            byte[] array = Files.readAllBytes(new File("11.txt.cod").toPath());
-            System.out.println("size: " + array.length);
-            char a = (char) array[291];
-            int count = (array[293] << 8) | (array[292] & 0xFF);;
-            System.out.println("char: " + a);
-            System.out.println("count: " + count);
         } catch (IOException ex) {
             Logger.getLogger(Decompressor.class.getName()).log(Level.SEVERE, null, ex);
         }

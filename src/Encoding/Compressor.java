@@ -19,6 +19,9 @@ import java.util.logging.Logger;
 
 /**
  * This class is to be used with the FileProcessor class and the HuffmanTree
+ * This class creates 2 arrays to save a character count for a huffman tree
+ * and an array of bytes representing each character from a text file.
+ * 
  *
  * @author Steve Bentley
  */
@@ -33,10 +36,49 @@ public class Compressor {
     public byte[] byteArray;
     List<Byte> byteList = new ArrayList<Byte>();
     public boolean test = true;
+    public double ratio;
 
-    public Compressor(String fileName) {
+    /**
+     * this constructor is wrong and asks for arguments
+     */
+    public Compressor() {
+        System.out.println("Please enter file name as argument and optional -d "
+                + "for decode mode");
+    }
+/**
+ * this constructor takes the first string, either mode or filename
+ * @param mode 
+ */
+    public Compressor(String mode) {
+        if (!mode.equals("-d")) {
+
+            this.fileName = mode;
+            this.setUp();
+            this.writeBytes();
+
+        } else if (mode.equals("-d")) {
+            System.out.println("Please enter optional -d with file name"
+                    + " arguments");
+        }
+    }
+/**
+ * this constructor takes the mode and the filename
+ * @param mode
+ * @param fileName 
+ */
+    public Compressor(String mode, String fileName) {
         //creating fileprocessor to process the text file
-        this.fileName = fileName;
+        if (mode.equals("-d")) {
+            this.fileName = fileName;
+            Decompressor decomp = new Decompressor(fileName);
+            decomp.decompress();
+        }
+
+    }
+/**
+ * sets up huffman tree for encoding
+ */
+    public void setUp() {
         FileProcessor fp = new FileProcessor(charry);
         file = new File(fileName);
 
@@ -55,7 +97,9 @@ public class Compressor {
             charTotal += charry[i];
         }
     }
-
+/**
+ * writes the bytes to the array using the huffman tree
+ */
     public void writeBytes() {
         FileReader fr = null;
 
@@ -77,13 +121,14 @@ public class Compressor {
 
                 //for each character in the string count it and encode it
                 for (int i = 0; i < line.length() + 1; i++) {
-                    if(i == line.length()){
+                    if (i == line.length()) {
                         currentChar = '\n';
-                        charCount ++;
-                        charCount ++;
-                    }else{
-                    currentChar = line.charAt(i);
-                    charCount++;}
+                        charCount++;
+                        charCount++;
+                    } else {
+                        currentChar = line.charAt(i);
+                        charCount++;
+                    }
                     charCode = huff.encode(String.valueOf(currentChar));
                     //take the encoded char and add it to the tempbyte
                     for (int x = 0; x < charCode.length(); x++) {
@@ -91,35 +136,34 @@ public class Compressor {
                         if (charCode.charAt(x) == '1') {
                             tempByte |= 1;
                             positionCount++;
-                            if(positionCount != 8)
+                            if (positionCount != 8) {
                                 tempByte <<= 1;
+                            }
                         } else {
                             positionCount++;
-                            if(positionCount != 8)
-                            tempByte <<= 1;
+                            if (positionCount != 8) {
+                                tempByte <<= 1;
+                            }
                         }
                         //if the byte is full, add and start count over
                         if (positionCount == 8) {
                             byteList.add(tempByte);
-                               
+
                             tempByte = 0;
                             positionCount = 0;
 
                             //if its the last character and byte isnt full, add
                             //zeroes and shift everything all the way to the right
-                        } else if (charCount == charTotal) {
-                            for (int y = positionCount; y < 8; y++) {
-                                tempByte <<= 1;
-                            }
-                            byteList.add(tempByte);
-   
                         }
+
                     }
                 }
                 line = "";
             }
-            //testing arraylist
-            System.out.println("1st byte: " + String.format("%8s", Integer.toBinaryString(byteList.get(0) & 0xFF)).replace(' ', '0'));
+            for (int y = positionCount; y < 8; y++) {
+                tempByte <<= 1;
+            }
+            byteList.add(tempByte);
 
             //convert Byte arraylist to byte array and empty arraylist.
             byteArray = new byte[byteList.size()];
@@ -129,28 +173,39 @@ public class Compressor {
             byteList.clear();
 
             //write the array to a file
-            File arrayFile = new File(fileName + ".huf");
+            File arrayFile = new File(fileName.substring(0, fileName.length() - 4) + ".huf");
             arrayFile.createNewFile();
-            FileOutputStream fos = new FileOutputStream(fileName + ".huf", false);
+            FileOutputStream fos = new FileOutputStream(fileName.substring(0, fileName.length() - 4) + ".huf", false);
             fos.write(byteArray);
             fos.close();
 
             //convert original char/count array to a 3 byte array
             byte[] charCountArray = new byte[384];
             for (int i = 0; i < 128; i++) {
-                charCountArray[i*3] = (byte) ((char) i);
-                charCountArray[(i*3) + 1] = (byte) charry[i];
-                charCountArray[(i*3) + 2] = (byte) (charry[i] >>> 8);
+                charCountArray[i * 3] = (byte) ((char) i);
+                charCountArray[(i * 3) + 1] = (byte) charry[i];
+                charCountArray[(i * 3) + 2] = (byte) (charry[i] >>> 8);
             }
             //save this new array to a file
-            File arrayFile2 = new File(fileName + ".cod");
+            File arrayFile2 = new File(fileName.substring(0, fileName.length() - 4) + ".cod");
             arrayFile2.createNewFile();
-            FileOutputStream fos2 = new FileOutputStream(fileName + ".cod", false);
+            FileOutputStream fos2 = new FileOutputStream(fileName.substring(0, fileName.length() - 4) + ".cod", false);
             fos2.write(charCountArray);
             fos.close();
+            
+            //figuring out compression ratio
+            File size2 = new File(fileName.substring(0, fileName.length() - 4) + ".huf");
+            double fileSize = file.length();
+            double secondArraySize = size2.length();
+            
+            ratio = secondArraySize/fileSize;
+            //outputting compression to console
+            System.out.println(fileName.substring(0, fileName.length() - 4) + ".huf" + ": " + (ratio*100) + "% compression");
+            
+            
 
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(Compressor.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("File Not Found");
         } catch (IOException ex) {
             Logger.getLogger(Compressor.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
